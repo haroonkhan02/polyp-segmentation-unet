@@ -1,0 +1,26 @@
+# Default training run (reports/ and the README numbers come from this file).
+encoder: resnet34
+pretrained: true
+image_size: 320
+epochs: 40
+batch_size: 8
+lr: 0.0003
+weight_decay: 0.0001
+dropout: 0.2        # Dropout2d after each decoder block; kept active at test time for MC dropout
+bce_weight: 0.5     # loss = 0.5 * BCE + 0.5 * soft Dice
+workers: 4
+seed: 0
+augment:
+  hflip: 0.5
+  vflip: 0.5
+  rotate90: 0.5
+  affine: 0.7
+  max_rotate: 25
+  scale: [0.8, 1.2]
+  shift: 0.1
+  color: 0.8
+  brightness: 0.2
+  contrast: 0.2
+  hue: 8
+  saturation: 0.2
+  blur: 0.2
