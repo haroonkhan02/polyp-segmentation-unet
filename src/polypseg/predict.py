@@ -10,6 +10,8 @@ import argparse
 import json
 from pathlib import Path
 
+import cv2
+
 from .config import MODELS_DIR, OUTPUTS_DIR
 from .data import read_image
 from .metrics import binarize
@@ -39,7 +41,9 @@ def predict_file(seg: PolypSegmenter, path: Path, out_dir: Path, threshold: floa
         mean, std = mean_std(seg.predict_mc(rgb, mc_samples))
         panels.append((blend_heatmap(rgb, std, vmax=0.5), f"MC-dropout std ({mc_samples})"))
         info["uncertainty"] = summarize_uncertainty(std, pred)
-    save_rgb(out_dir / f"{path.stem}_pred.jpg", tile([label(im, t) for im, t in panels], 320))
+    save_rgb(out_dir / f"{path.stem}_pred.jpg",
+             tile([label(cv2.resize(im, (320, 320), interpolation=cv2.INTER_AREA), t)
+                   for im, t in panels], 320))
     save_rgb(out_dir / f"{path.stem}_mask.png", (pred * 255).astype("uint8"))
     return info
 
