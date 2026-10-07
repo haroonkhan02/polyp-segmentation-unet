@@ -51,6 +51,8 @@ def plot_dice_vs_size_and_uncertainty(per_image: list[dict], path: Path) -> None
     fig, axes = plt.subplots(1, 2, figsize=(10, 3.6))
     axes[0].scatter(size, dice, s=14, alpha=0.7, color="#264653")
     axes[0].set_xscale("log"), axes[0].set_xlabel("polyp area (% of image, log)")
+    axes[0].set_xticks([1, 3, 10, 30, 100], ["1", "3", "10", "30", "100"], minor=False)
+    axes[0].set_xticks([], minor=True)
     axes[0].set_ylabel("Dice"), axes[0].set_ylim(0, 1.02)
     axes[1].scatter(unc, dice, s=14, alpha=0.7, color="#e76f51")
     axes[1].set_xlabel("mean MC-dropout std over the image"), axes[1].set_ylim(0, 1.02)
