@@ -69,13 +69,18 @@ def mosaic(rows: list[np.ndarray]) -> np.ndarray:
 
 def case_row(rgb: np.ndarray, pred: np.ndarray, target: np.ndarray,
              uncertainty: np.ndarray | None, title: str, size: int = 256) -> np.ndarray:
-    """image | ground truth | prediction | TP/FN/FP comparison | uncertainty."""
-    panels = [label(rgb, title), label(overlay_mask(rgb, target), "ground truth"),
-              label(overlay_mask(rgb, pred), "prediction"),
-              label(overlay_comparison(rgb, pred, target), "green TP  red FN  blue FP")]
+    """image | ground truth | prediction | TP/FN/FP comparison | uncertainty.
+
+    Panels are resized *before* labelling so the text has the same size on every frame.
+    """
+    panels = [(rgb, title), (overlay_mask(rgb, target), "ground truth"),
+              (overlay_mask(rgb, pred), "prediction"),
+              (overlay_comparison(rgb, pred, target), "green TP  red FN  blue FP")]
     if uncertainty is not None:
-        panels.append(label(blend_heatmap(rgb, uncertainty, vmax=0.5), "MC-dropout std"))
-    return tile(panels, size)
+        panels.append((blend_heatmap(rgb, uncertainty, vmax=0.5), "MC-dropout std"))
+    return np.concatenate(
+        [label(cv2.resize(im, (size, size), interpolation=cv2.INTER_AREA), text, 0.45)
+         for im, text in panels], axis=1)
 
 
 def save_rgb(path, rgb: np.ndarray) -> None:

@@ -31,15 +31,15 @@ def predict_file(seg: PolypSegmenter, path: Path, out_dir: Path, threshold: floa
     rgb = read_image(path)
     probs = seg.predict(rgb)
     pred = binarize(probs, threshold)
-    panels = [label(rgb, path.stem[:16]), label(overlay_mask(rgb, pred), "prediction"),
-              label(blend_heatmap(rgb, probs, vmax=1.0), "probability")]
+    panels = [(rgb, path.stem[:16]), (overlay_mask(rgb, pred), "prediction"),
+              (blend_heatmap(rgb, probs, vmax=1.0), "probability")]
     info = {"file": path.name, "polyp_fraction": float(pred.mean()),
             "inference_ms": seg.last_inference_ms}
     if mc_samples > 0:
         mean, std = mean_std(seg.predict_mc(rgb, mc_samples))
-        panels.append(label(blend_heatmap(rgb, std, vmax=0.5), f"MC-dropout std ({mc_samples})"))
+        panels.append((blend_heatmap(rgb, std, vmax=0.5), f"MC-dropout std ({mc_samples})"))
         info["uncertainty"] = summarize_uncertainty(std, pred)
-    save_rgb(out_dir / f"{path.stem}_pred.jpg", tile(panels, 320))
+    save_rgb(out_dir / f"{path.stem}_pred.jpg", tile([label(im, t) for im, t in panels], 320))
     save_rgb(out_dir / f"{path.stem}_mask.png", (pred * 255).astype("uint8"))
     return info
 
