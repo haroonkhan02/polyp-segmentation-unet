@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "polyp-segmentation-unet"
+version = "1.0.0"
+description = "Colon polyp segmentation on Kvasir-SEG with a pretrained-encoder U-Net, Dice/IoU evaluation, Monte-Carlo-dropout uncertainty maps and failure-case analysis."
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Muhammad Haroon Khan" }]
+requires-python = ">=3.10,<3.13"
+dependencies = [
+    "numpy>=1.26",
+    "opencv-python>=4.9",
+    "pyyaml>=6",
+    "tqdm>=4.66",
+    "matplotlib>=3.8",
+    "torch>=2.2",
+    "torchvision>=0.17",
+    "segmentation-models-pytorch>=0.3.3",
+]
+
+[project.optional-dependencies]
+demo = ["gradio>=4"]
+dev = ["pytest>=8", "ruff>=0.6"]
+
+[project.scripts]
+polyp-download = "polypseg.download:main"
+polyp-train = "polypseg.train:main"
+polyp-evaluate = "polypseg.evaluate:main"
+polyp-predict = "polypseg.predict:main"
+polyp-demo = "polypseg.demo:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
