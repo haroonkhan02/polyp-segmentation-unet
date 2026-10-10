@@ -3,7 +3,7 @@
 ## Model details
 - **Architecture:** U-Net (`segmentation_models_pytorch`) with an ImageNet-pretrained ResNet-34 encoder, `Dropout2d(0.2)` after each of the five decoder blocks, one sigmoid output channel.
 - **Input:** RGB colonoscopy frame, resized to 320×320, ImageNet-normalised. Output mask is resized back to the original resolution.
-- **Training:** 800 Kvasir-SEG images, BCE + soft Dice loss, AdamW (lr 3e-4, wd 1e-4), OneCycle schedule, batch 8, 40 epochs, flips / rot90 / affine / colour / blur augmentation. Best validation-Dice checkpoint (epoch 38). Trained on an Apple M5 GPU (MPS) in 39 minutes. Full config: [`configs/kvasir_unet.yaml`](configs/kvasir_unet.yaml).
+- **Training:** 800 Kvasir-SEG images, BCE + soft Dice loss, AdamW (lr 3e-4, wd 1e-4), OneCycle schedule, batch 8, 40 epochs, flips / rot90 / affine / colour / blur augmentation. Best validation-Dice checkpoint (epoch 35). Trained on an Apple M5 GPU (MPS) in 40 minutes (retrained 2026-10-10 after fixing per-worker augmentation seeding). Full config: [`configs/kvasir_unet.yaml`](configs/kvasir_unet.yaml).
 - **Author:** Muhammad Haroon Khan. **License:** MIT (code). Dataset: CC BY 4.0.
 
 ## Intended use
@@ -18,19 +18,19 @@ Kvasir-SEG (Jha et al., 2020): 1,000 colonoscopy frames with polyp masks from Ve
 
 | Metric | Deterministic | MC-dropout mean (20 passes) |
 |---|---|---|
-| mean per-image Dice | 0.908 | 0.908 |
-| mean per-image IoU | 0.848 | 0.847 |
-| precision / recall | 0.939 / 0.902 | 0.937 / 0.903 |
-| dataset-level (pooled) Dice | 0.906 | 0.905 |
+| mean per-image Dice | 0.904 | 0.904 |
+| mean per-image IoU | 0.844 | 0.845 |
+| precision / recall | 0.937 / 0.901 | 0.937 / 0.903 |
+| dataset-level (pooled) Dice | 0.903 | 0.904 |
 
-By polyp size (mean Dice): small (<5%) 0.893 (n=16), medium (5-20%) 0.934 (n=51), large (>20%) 0.876 (n=33).
+By polyp size (mean Dice): small (<5%) 0.868 (n=16), medium (5-20%) 0.938 (n=51), large (>20%) 0.867 (n=33).
 
-Uncertainty: std on mis-classified pixels 0.104 vs. 0.010 on correct pixels; pixel-error AUROC 0.906; Spearman(image Dice, mean std) = -0.28.
+Uncertainty: std on mis-classified pixels 0.103 vs. 0.010 on correct pixels; pixel-error AUROC 0.930; Spearman(image Dice, mean std) = -0.36.
 
 ## Limitations and risks
 - **Single source.** One hospital, one family of endoscopes, 1,000 frames. Performance on other equipment, lighting, bowel preparation quality or patient populations is unknown and will likely be worse.
 - **No negatives.** Every training and test frame contains a polyp, so the false-positive rate on healthy mucosa was never measured. The model may highlight folds, bubbles or specular reflections.
-- **Small polyps are the weakest category** (see the size table) and are also the clinically most important ones.
+- **Small and large polyps are the weakest categories** (Dice 0.868 and 0.867 vs. 0.938 for medium; see the size table). Small polyps are also the clinically most important ones, and with only 16 small polyps in the test set their score is the least certain.
 - **Small test set.** 100 images give roughly ±0.03 uncertainty on mean Dice; differences of that size between settings are not meaningful.
 - **Uncertainty is a heuristic.** MC dropout captures model (epistemic) uncertainty only, under an approximation; a confident-looking map does not imply a correct mask.
 - **Labels are imperfect.** Some Kvasir-SEG masks are coarse polygons; the model is scored against them, so part of the "error" is annotation noise.
