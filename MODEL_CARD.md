@@ -31,7 +31,7 @@ Uncertainty: std on mis-classified pixels 0.103 vs. 0.010 on correct pixels; pix
 - **Single source.** One hospital, one family of endoscopes, 1,000 frames. Performance on other equipment, lighting, bowel preparation quality or patient populations is unknown and will likely be worse.
 - **No negatives.** Every training and test frame contains a polyp, so the false-positive rate on healthy mucosa was never measured. The model may highlight folds, bubbles or specular reflections.
 - **Small and large polyps are the weakest categories** (Dice 0.868 and 0.867 vs. 0.938 for medium; see the size table). Small polyps are also the clinically most important ones, and with only 16 small polyps in the test set their score is the least certain.
-- **Small test set.** 100 images give roughly ±0.03 uncertainty on mean Dice; differences of that size between settings are not meaningful.
+- **Small test set.** 100 images give roughly ±0.025 uncertainty on mean Dice (95 % interval); differences of that size between settings are not meaningful.
 - **Uncertainty is a heuristic.** MC dropout captures model (epistemic) uncertainty only, under an approximation; a confident-looking map does not imply a correct mask.
 - **Labels are imperfect.** Some Kvasir-SEG masks are coarse polygons; the model is scored against them, so part of the "error" is annotation noise.
 
