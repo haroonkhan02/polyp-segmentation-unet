@@ -19,7 +19,7 @@ import torch
 from torch.utils.data import DataLoader
 
 from .config import DEFAULT_CONFIG, KVASIR_DIR, MODELS_DIR, REPORTS_DIR, ROOT, TrainConfig
-from .data import PolypDataset, load_or_create_split
+from .data import PolypDataset, load_or_create_split, seed_worker
 from .losses import BCEDiceLoss
 from .metrics import Confusion, binarize
 from .model import build_model, pick_device, save_checkpoint
@@ -106,7 +106,7 @@ def main() -> None:
     train_loader = DataLoader(
         PolypDataset(split["train"], args.root, cfg.image_size, cfg.augment, cfg.seed),
         batch_size=cfg.batch_size, shuffle=True, num_workers=cfg.workers,
-        persistent_workers=cfg.workers > 0, drop_last=True)
+        persistent_workers=cfg.workers > 0, drop_last=True, worker_init_fn=seed_worker)
     val_loader = DataLoader(PolypDataset(split["val"], args.root, cfg.image_size),
                             batch_size=cfg.batch_size, num_workers=cfg.workers)
 

@@ -84,6 +84,18 @@ def preprocess(img: np.ndarray, size: int) -> torch.Tensor:
     return to_tensor(cv2.resize(img, (size, size), interpolation=cv2.INTER_AREA)).unsqueeze(0)
 
 
+def seed_worker(worker_id: int) -> None:
+    """DataLoader ``worker_init_fn``: give each worker its own augmentation RNG.
+
+    Workers receive a pickled copy of the dataset, so without this every worker would draw the
+    *same* sequence of augmentation parameters. torch assigns each worker a distinct seed derived
+    from the (seeded) main-process generator, so runs stay reproducible.
+    """
+    info = torch.utils.data.get_worker_info()
+    if info is not None and hasattr(info.dataset, "rng"):
+        info.dataset.rng = np.random.default_rng(info.seed % 2**32)
+
+
 class PolypDataset(Dataset):
     """Returns (image tensor 3xSxS, mask tensor 1xSxS float {0,1}) for a list of stems."""
 

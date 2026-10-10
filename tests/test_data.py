@@ -93,3 +93,18 @@ def test_preprocess_normalises_with_imagenet_stats():
     assert x.shape == (1, 3, 32, 32)
     expected = (1.0 - 0.485) / 0.229
     assert abs(x[0, 0, 0, 0].item() - expected) < 1e-5
+
+
+def test_seed_worker_gives_each_worker_its_own_rng(monkeypatch, fake_kvasir):
+    from types import SimpleNamespace
+
+    import polypseg.data as data
+
+    draws = []
+    for worker_id in range(2):
+        ds = data.PolypDataset(["img0"], fake_kvasir, size=64, augment={"hflip": 0.5}, seed=0)
+        info = SimpleNamespace(seed=1234 + worker_id, dataset=ds)
+        monkeypatch.setattr(data.torch.utils.data, "get_worker_info", lambda info=info: info)
+        data.seed_worker(worker_id)
+        draws.append(ds.rng.random(5).tolist())
+    assert draws[0] != draws[1]
