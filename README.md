@@ -30,7 +30,7 @@ Held-out test split of 100 images, threshold 0.5, checkpoint with the best valid
 
 | Prediction | Mean Dice | Mean IoU | Precision | Recall | ms / image |
 |---|---|---|---|---|---|
-| Deterministic | 0.904 | 0.844 | 0.937 | 0.901 | 6.4 |
+| Deterministic | 0.904 | 0.844 | 0.937 | 0.901 | 12.4 |
 | MC-dropout mean (20 passes) | 0.904 | 0.845 | 0.937 | 0.903 | 188 |
 
 | Polyp size (share of frame) | Images | Mean Dice | Recall |
@@ -53,6 +53,23 @@ Limitations of the evaluation: 100 test images give about ±0.025 noise on mean 
 <p align="center"><sub>The four worst test cases, all under-segmentation (precision above 0.9, recall 0.17–0.29). Only row 2 has high uncertainty over the missed region; the others are confident misses.</sub></p>
 
 Training curves, error-analysis plots and per-image metrics are in [`reports/`](reports).
+
+## Export and in-browser demo
+
+The exported graph includes the ImageNet normalisation and the sigmoid, so a client only resizes the image and divides by 255. Every variant was re-scored on the 100 test images and timed on the M5 (network only, median of 100 runs):
+
+| Variant | Size | Mean Dice | Latency |
+|---|---|---|---|
+| PyTorch FP32 | 98 MB | 0.9036 | 12.9 ms MPS · 49.5 ms CPU |
+| ONNX FP32 / FP16 | 98 / 49 MB | 0.9036 | 30.8 / 30.6 ms (onnxruntime CPU) |
+| ONNX INT8 (static, QDQ) | 25 MB | 0.9043 | 21.7 ms (onnxruntime CPU) |
+| CoreML FP32 / FP16 | 98 / 49 MB | 0.9036 / 0.9037 | 7.7 / 1.9 ms (GPU / Neural Engine) |
+
+FP32 and FP16 exports change nothing measurable. INT8 keeps the score at a quarter of the size; on average 0.15 % of pixels flip, but on one image the INT8 mask overlaps the PyTorch mask with Dice 0.89, so single masks can move even when the average doesn't. CoreML FP16 on the Neural Engine is 7× faster than PyTorch on the GPU.
+
+A second graph keeps decoder dropout on: the encoder runs once, the decoder runs 8 times on the repeated features, and the graph returns the mean and standard deviation maps. Exported this way (INT8, 25 MB) its std map detects the model's pixel errors with an AUROC between 0.91 and 0.94 across runs, the same range as PyTorch with 8 samples (the number moves by up to 0.02 between random seeds).
+
+The demo in [`web/`](web) is a static page that runs both INT8 graphs with onnxruntime-web (WebAssembly, 4 threads): about 180 ms per frame for the mask and 630 ms for the uncertainty map in Chrome on the M5. The resize and post-processing are ported to JavaScript; on the 100 test images the JavaScript masks match Python's (mean Dice 0.9043 both, at most 0.09 % of pixels differ, from small INT8 kernel differences between WebAssembly and native onnxruntime; with the FP32 file the maps agree to 0.0014). Details: [`reports/export.md`](reports/export.md), [`reports/benchmark.md`](reports/benchmark.md), [`reports/web_parity.json`](reports/web_parity.json).
 
 ## How it works
 
@@ -85,9 +102,13 @@ polyp-train --config configs/kvasir_unet.yaml    # ~40 min on an M5
 polyp-evaluate --split test --mc-samples 20      # writes reports/
 polyp-predict path/to/frame.jpg --mc-samples 20  # overlay + uncertainty map
 polyp-demo                                       # Gradio app
+
+uv pip install -e ".[export]"
+polyp-export && polyp-benchmark                  # ONNX / CoreML files, parity, latency
+python scripts/deploy_static_space.py --dry-run  # browser demo bundle in outputs/static_space
 ```
 
-Weights (98 MB) are not committed; `polyp-train` reproduces them. Config keys can be overridden on the command line, e.g. `polyp-train --encoder resnet18 --epochs 20`. Tests use synthetic images and need no data or GPU: `pytest` (27 tests) and `ruff check .`.
+Weights (98 MB) are not committed; `polyp-train` reproduces them. Config keys can be overridden on the command line, e.g. `polyp-train --encoder resnet18 --epochs 20`. Tests use synthetic images and need no data or GPU: `pytest` (35 tests) and `ruff check .`.
 
 ## Repository structure
 
@@ -105,8 +126,15 @@ polyp-segmentation-unet/
 │   ├── evaluate.py      # metrics, size strata, galleries -> reports/
 │   ├── predict.py       # CLI for an image or folder
 │   ├── demo.py          # Gradio app
+│   ├── export.py        # ONNX / FP16 / INT8 / CoreML export, MC-dropout graph
+│   ├── export_models.py # polyp-export: parity + test-set re-scoring
+│   ├── mc_export.py     # MC graph export and uncertainty scoring
+│   ├── benchmark.py     # polyp-benchmark: latency per backend
 │   ├── plots.py  viz.py # curves, overlays, heatmaps
 │   └── config.py        # paths and YAML-backed config
+├── web/                 # browser demo (static Space): HTML, app.js, polyp.js
+├── scripts/             # Space deploy, JavaScript-vs-Python parity check
+├── hub/                 # model card for the Hugging Face model repo
 ├── configs/             # hyper-parameters, fixed split
 ├── tests/               # synthetic images, no data needed
 ├── reports/             # results, galleries, curves
@@ -125,6 +153,8 @@ polyp-segmentation-unet/
 | Uncertainty scored against errors | An uncertainty map is only useful if it's higher where the model is wrong. |
 | Vertical flips and 90° rotations | Endoscopy frames have no canonical orientation. |
 | Augmentation RNG seeded per DataLoader worker | Otherwise all workers draw identical augmentations. |
+| MC graph runs the encoder once | Dropout only sits in the decoder, so repeating the encoder features gives the same samples for much less compute in the browser. |
+| Everything after the last convolution stays float in INT8 | An 8-bit sigmoid or std would put the threshold on a coarse grid and round small uncertainties to zero. |
 
 ## Limitations and future work
 
@@ -132,6 +162,7 @@ polyp-segmentation-unet/
 - No polyp-free frames, so false positives on healthy tissue can't be measured; HyperKvasir negatives would fix that.
 - MC dropout misses confident errors. A deep ensemble or test-time augmentation is the next comparison.
 - Stronger decoders (U-Net++, FPN) or a transformer encoder at the same budget.
+- The browser demo runs on WebAssembly only; WebGPU with the FP16 file would be faster.
 
 ## Acknowledgements
 

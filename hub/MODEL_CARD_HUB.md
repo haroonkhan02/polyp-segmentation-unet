@@ -40,7 +40,7 @@ Held-out test split of 100 Kvasir-SEG images (committed seeded split), threshold
 resolution. Mean per-image Dice 0.904 and IoU 0.844 for the PyTorch model; the ONNX FP32/FP16
 and INT8 files score the same to within 0.001 (INT8: 0.9043 vs 0.9036). By polyp size: small
 (< 5 % of the frame) 0.868, medium 0.938, large 0.867. The MC-dropout std map detects the
-model's pixel errors with an AUROC of about 0.92–0.94 (8 samples; it varies by up to 0.02
+model's pixel errors with an AUROC between 0.91 and 0.94 (8 samples; it varies by up to 0.02
 between random seeds). It flags uncertain boundaries well but misses regions the model is
 confidently wrong about.
 
