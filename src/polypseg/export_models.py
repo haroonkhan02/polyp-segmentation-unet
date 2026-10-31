@@ -118,6 +118,8 @@ def main() -> None:
     parser.add_argument("--threshold", type=float, default=0.5)
     parser.add_argument("--calib", type=int, default=128, help="INT8 calibration images (train)")
     parser.add_argument("--no-coreml", action="store_true")
+    parser.add_argument("--mc-samples", type=int, default=8,
+                        help="samples in the MC-dropout graph (0 skips it)")
     parser.add_argument("--skip-export", action="store_true", help="reuse files in --out-dir")
     args = parser.parse_args()
 
@@ -132,6 +134,21 @@ def main() -> None:
     else:
         paths = build_variants(args.checkpoint, split["train"], args.root, args.out_dir,
                                not args.no_coreml, args.calib)
+
+    mc_paths = {}
+    if args.mc_samples > 0:
+        from .mc_export import MC_FILES, build_mc_variants
+
+        if args.skip_export:
+            mc_paths = {k: args.out_dir / v.format(t=args.mc_samples)
+                        for k, v in MC_FILES.items()}
+        else:
+            from .export import load_wrapped
+
+            mc_paths = build_mc_variants(
+                args.checkpoint, args.out_dir, args.mc_samples,
+                calibration_batches(split["train"], args.root, load_wrapped(args.checkpoint)[1],
+                                    args.calib))
 
     images = [read_image(args.root / "images" / f"{s}.jpg") for s in stems]
     targets = [read_mask(args.root / "masks" / f"{s}.jpg") for s in stems]
@@ -158,10 +175,17 @@ def main() -> None:
         print(kind, json.dumps(report["variants"][kind]["parity"]),
               f"mean Dice {report['variants'][kind]['metrics']['mean_per_image']['dice']:.4f}")
 
+    text = markdown(report)
+    if mc_paths:
+        from . import mc_export
+
+        report["mc_dropout"] = mc_export.evaluate_mc(args.checkpoint, mc_paths, images, targets,
+                                                     ref_probs, args.mc_samples, args.threshold)
+        text += mc_export.markdown(report["mc_dropout"])
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
     (REPORTS_DIR / "export.json").write_text(json.dumps(report, indent=2))
-    (REPORTS_DIR / "export.md").write_text(markdown(report))
-    print(markdown(report))
+    (REPORTS_DIR / "export.md").write_text(text)
+    print(text)
 
 
 if __name__ == "__main__":

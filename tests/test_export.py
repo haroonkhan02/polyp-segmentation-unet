@@ -7,7 +7,7 @@ pytest.importorskip("onnxconverter_common")
 
 from polypseg import export  # noqa: E402
 from polypseg.data import preprocess  # noqa: E402
-from polypseg.model import PolypSegmenter  # noqa: E402
+from polypseg.model import PolypSegmenter, load_checkpoint  # noqa: E402
 
 from .conftest import synthetic_case  # noqa: E402
 
@@ -72,3 +72,46 @@ def test_int8_quantises_and_keeps_output_sigmoid_in_float(onnx_fp32, tmp_path):
     assert last.op_type == "Sigmoid"
     probs = export.OnnxSegmenter(int8).predict(_image(5))
     assert probs.min() >= 0.0 and probs.max() <= 1.0
+
+
+def test_mc_wrapper_matches_repeated_dropout_samples(tiny_checkpoint):
+    model, cfg, _ = load_checkpoint(tiny_checkpoint)
+    wrapper = export.MCDropoutWrapper(model, samples=6).eval()
+    x = torch.from_numpy(export.image_batch(_image(), cfg.image_size))
+    with torch.no_grad():
+        torch.manual_seed(0)
+        mean, std = wrapper(x)
+        torch.manual_seed(1)
+        mean2, _ = wrapper(x)
+    assert mean.shape == std.shape == (1, 1, 64, 64)
+    assert (std > 0).any() and not torch.equal(mean, mean2)  # dropout is really sampled
+    # The original model is untouched: still deterministic, dropout layers in eval mode.
+    with torch.no_grad():
+        assert torch.equal(model(x), model(x))
+    assert all(not m.training for m in model.modules())
+
+
+def test_mc_wrapper_without_dropout_is_the_deterministic_prediction(tiny_checkpoint):
+    model, cfg, _ = load_checkpoint(tiny_checkpoint)
+    wrapper = export.MCDropoutWrapper(model, samples=4).eval()
+    for block in wrapper.model.decoder.blocks:
+        block.dropout.p = 0.0
+    x = torch.from_numpy(export.image_batch(_image(), cfg.image_size))
+    with torch.no_grad():
+        mean, std = wrapper(x)
+        ref = export.ExportWrapper(model).eval()(x)
+    torch.testing.assert_close(mean, ref, atol=1e-5, rtol=0)
+    assert float(std.max()) < 1e-5
+
+
+def test_mc_onnx_runs_and_samples(tiny_checkpoint, tmp_path):
+    import onnxruntime as ort
+
+    path = export.export_mc_onnx(tiny_checkpoint, tmp_path / "mc.onnx", samples=5)
+    sess = ort.InferenceSession(str(path), providers=["CPUExecutionProvider"])
+    x = export.image_batch(_image(), 64)
+    mean, std = sess.run(list(export.MC_OUTPUTS), {export.INPUT_NAME: x})
+    mean2, _ = sess.run(list(export.MC_OUTPUTS), {export.INPUT_NAME: x})
+    assert mean.shape == std.shape == (1, 1, 64, 64)
+    assert std.max() > 0 and not np.array_equal(mean, mean2)
+    assert mean.min() >= 0.0 and mean.max() <= 1.0

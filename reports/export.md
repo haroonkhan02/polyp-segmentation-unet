@@ -10,3 +10,13 @@
 | onnx_int8 | 24.7 | 0.41 | 0.145 % / 2.01 % | 0.8856 | 0.9043 | 0.8443 | 4 |
 | coreml_fp16 | 48.9 | 0.031 | 0.006 % / 0.12 % | 0.9936 | 0.9037 | 0.8437 | 4 |
 | coreml_fp32 | 97.8 | 8.5e-06 | 0.000 % / 0.00 % | 1.0000 | 0.9036 | 0.8436 | 4 |
+
+## Monte-Carlo dropout graph (8 samples)
+
+Random sampling, so this compares scores, not pixels. AUROC: std map as a detector of the deterministic PyTorch model's pixel errors. With 8 samples the AUROC of the same model moves by up to 0.02 between random seeds, so differences of that size between rows are sampling noise.
+
+| Variant | Size (MB) | Mean-prediction Dice | Pixel-error AUROC | Std on errors / correct |
+|---|---|---|---|---|
+| pytorch_mc | (checkpoint) | 0.9034 | 0.914 | 0.063 / 0.0079 |
+| onnx_mc_fp32 | 97.8 | 0.9038 | 0.939 | 0.068 / 0.0080 |
+| onnx_mc_int8 | 24.7 | 0.9038 | 0.916 | 0.063 / 0.0081 |
