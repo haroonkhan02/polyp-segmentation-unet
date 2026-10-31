@@ -7,7 +7,7 @@ sdk: static
 app_file: index.html
 pinned: false
 license: mit
-short_description: Kvasir-SEG U-Net with MC-dropout uncertainty, in your browser
+short_description: Kvasir-SEG polyp U-Net with uncertainty, in your browser
 models:
   - haroonx02/polyp-segmentation-unet-resnet34
 custom_headers:

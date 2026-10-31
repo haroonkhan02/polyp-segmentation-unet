@@ -8,6 +8,7 @@ Colon polyp segmentation on Kvasir-SEG with a pretrained-encoder U-Net, plus Mon
 ![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue)
 ![PyTorch](https://img.shields.io/badge/PyTorch-U--Net-ee4c2c)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
+[![Live demo](https://img.shields.io/badge/demo-in--browser-yellow)](https://huggingface.co/spaces/haroonx02/polyp-segmentation-browser)
 
 <img src="reports/gallery_test.jpg" width="900" alt="Test gallery: image, ground truth, prediction, error map, uncertainty">
 
@@ -69,7 +70,7 @@ FP32 and FP16 exports change nothing measurable. INT8 keeps the score at a quart
 
 A second graph keeps decoder dropout on: the encoder runs once, the decoder runs 8 times on the repeated features, and the graph returns the mean and standard deviation maps. Exported this way (INT8, 25 MB) its std map detects the model's pixel errors with an AUROC between 0.91 and 0.94 across runs, the same range as PyTorch with 8 samples (the number moves by up to 0.02 between random seeds).
 
-The demo in [`web/`](web) is a static page that runs both INT8 graphs with onnxruntime-web (WebAssembly, 4 threads): about 180 ms per frame for the mask and 630 ms for the uncertainty map in Chrome on the M5. The resize and post-processing are ported to JavaScript; on the 100 test images the JavaScript masks match Python's (mean Dice 0.9043 both, at most 0.09 % of pixels differ, from small INT8 kernel differences between WebAssembly and native onnxruntime; with the FP32 file the maps agree to 0.0014). Details: [`reports/export.md`](reports/export.md), [`reports/benchmark.md`](reports/benchmark.md), [`reports/web_parity.json`](reports/web_parity.json).
+The [live demo](https://huggingface.co/spaces/haroonx02/polyp-segmentation-browser) (source in [`web/`](web)) is a static Hugging Face Space that runs both INT8 graphs with onnxruntime-web (WebAssembly, 4 threads): about 180 ms per frame for the mask and 630 ms for the uncertainty map in Chrome on the M5. The resize and post-processing are ported to JavaScript; on the 100 test images the JavaScript masks match Python's (mean Dice 0.9043 both, at most 0.09 % of pixels differ, from small INT8 kernel differences between WebAssembly and native onnxruntime; with the FP32 file the maps agree to 0.0014). Details: [`reports/export.md`](reports/export.md), [`reports/benchmark.md`](reports/benchmark.md), [`reports/web_parity.json`](reports/web_parity.json).
 
 ## How it works
 
@@ -108,7 +109,7 @@ polyp-export && polyp-benchmark                  # ONNX / CoreML files, parity, 
 python scripts/deploy_static_space.py --dry-run  # browser demo bundle in outputs/static_space
 ```
 
-Weights (98 MB) are not committed; `polyp-train` reproduces them. Config keys can be overridden on the command line, e.g. `polyp-train --encoder resnet18 --epochs 20`. Tests use synthetic images and need no data or GPU: `pytest` (35 tests) and `ruff check .`.
+Weights (98 MB) are not committed; `polyp-train` reproduces them, or download them with the ONNX files from [Hugging Face](https://huggingface.co/haroonx02/polyp-segmentation-unet-resnet34). Config keys can be overridden on the command line, e.g. `polyp-train --encoder resnet18 --epochs 20`. Tests use synthetic images and need no data or GPU: `pytest` (35 tests) and `ruff check .`.
 
 ## Repository structure
 
