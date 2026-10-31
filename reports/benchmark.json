@@ -1,0 +1,64 @@
+{
+  "machine": "arm64 macOS-27.0.1-arm64-arm-64bit",
+  "onnxruntime": "1.31.1",
+  "torch": "2.14.1",
+  "input": "1x3x320x320",
+  "runs": 100,
+  "results": {
+    "pytorch_fp32 (cpu)": {
+      "size_mb": 97.909627,
+      "median_ms": 49.52208300528582,
+      "p90_ms": 50.24958780268207
+    },
+    "pytorch_fp32 (mps)": {
+      "size_mb": 97.909627,
+      "median_ms": 12.898125001811422,
+      "p90_ms": 13.512179502868094
+    },
+    "onnx_fp32 (onnxruntime CPU)": {
+      "size_mb": 97.742793,
+      "median_ms": 30.832812502922025,
+      "p90_ms": 34.71230829745764
+    },
+    "onnx_fp16 (onnxruntime CPU)": {
+      "size_mb": 48.903629,
+      "median_ms": 30.61381250154227,
+      "p90_ms": 34.174421096395236
+    },
+    "onnx_int8 (onnxruntime CPU)": {
+      "size_mb": 24.703381,
+      "median_ms": 21.65472899650922,
+      "p90_ms": 24.156008299905807
+    },
+    "coreml_fp16 (all)": {
+      "size_mb": 48.935492,
+      "median_ms": 1.9209579986636527,
+      "p90_ms": 1.9851298013236374
+    },
+    "coreml_fp16 (cpu_and_gpu)": {
+      "size_mb": 48.935492,
+      "median_ms": 4.580582994094584,
+      "p90_ms": 4.80798689823132
+    },
+    "coreml_fp16 (cpu_only)": {
+      "size_mb": 48.935492,
+      "median_ms": 10.78577149019111,
+      "p90_ms": 10.902495904883835
+    },
+    "coreml_fp32 (all)": {
+      "size_mb": 97.783048,
+      "median_ms": 7.694312495004851,
+      "p90_ms": 7.779183392995037
+    },
+    "coreml_fp32 (cpu_and_gpu)": {
+      "size_mb": 97.783048,
+      "median_ms": 7.6790620005340315,
+      "p90_ms": 7.7937708017998375
+    },
+    "coreml_fp32 (cpu_only)": {
+      "size_mb": 97.783048,
+      "median_ms": 24.624103993119206,
+      "p90_ms": 24.883187803789042
+    }
+  }
+}

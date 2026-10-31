@@ -1,0 +1,174 @@
+{
+  "checkpoint": "/Users/haroon/Downloads/Robotics/ai-portfolio/polyp-segmentation-unet/models/unet_resnet34.pt",
+  "split": "test",
+  "test_images": 100,
+  "threshold": 0.5,
+  "variants": {
+    "pytorch_fp32": {
+      "size_mb": 97.909627,
+      "metrics": {
+        "mean_per_image": {
+          "dice": 0.9036056645368276,
+          "iou": 0.8436027260410035,
+          "precision": 0.9372208810252666,
+          "recall": 0.9010859916941036,
+          "accuracy": 0.9689245597839884
+        },
+        "dataset_level": {
+          "dice": 0.9034023865386847,
+          "iou": 0.8238230463471222,
+          "precision": 0.9158430210994019,
+          "recall": 0.8912952047697357,
+          "accuracy": 0.969896455408945
+        },
+        "num_images": 100,
+        "below_0.5_dice": 4
+      }
+    },
+    "onnx_fp32": {
+      "file": "polyp_unet_fp32.onnx",
+      "size_mb": 97.742793,
+      "parity": {
+        "max_prob_diff": 1.5735626220703125e-05,
+        "flipped_mean": 3.044918639773945e-08,
+        "flipped_max": 3.0449186397739452e-06,
+        "mask_dice_min": 0.999974469603513,
+        "mask_dice_mean": 0.9999997446939232
+      },
+      "metrics": {
+        "mean_per_image": {
+          "dice": 0.9036058999755027,
+          "iou": 0.8436030046623848,
+          "precision": 0.9372208877779251,
+          "recall": 0.9010862723407134,
+          "accuracy": 0.968924590233175
+        },
+        "dataset_level": {
+          "dice": 0.9034024809394497,
+          "iou": 0.823823203351208,
+          "precision": 0.9158430357882628,
+          "recall": 0.8912953746326564,
+          "accuracy": 0.9698964822364011
+        },
+        "num_images": 100,
+        "below_0.5_dice": 4
+      }
+    },
+    "onnx_fp16": {
+      "file": "polyp_unet_fp16.onnx",
+      "size_mb": 48.903629,
+      "parity": {
+        "max_prob_diff": 0.0048882365226745605,
+        "flipped_mean": 1.419994929782887e-05,
+        "flipped_max": 0.00037353504225615163,
+        "mask_dice_min": 0.9991963567908064,
+        "mask_dice_mean": 0.999951056697781
+      },
+      "metrics": {
+        "mean_per_image": {
+          "dice": 0.9036196497050171,
+          "iou": 0.8436236397632324,
+          "precision": 0.9372304512306446,
+          "recall": 0.9010979010840192,
+          "accuracy": 0.9689299707445458
+        },
+        "dataset_level": {
+          "dice": 0.9034263643341992,
+          "iou": 0.8238629262554455,
+          "precision": 0.9158752686017295,
+          "recall": 0.891311341747195,
+          "accuracy": 0.9699041817163107
+        },
+        "num_images": 100,
+        "below_0.5_dice": 4
+      }
+    },
+    "onnx_int8": {
+      "file": "polyp_unet_int8.onnx",
+      "size_mb": 24.703381,
+      "parity": {
+        "max_prob_diff": 0.405159056186676,
+        "flipped_mean": 0.0014506439634525445,
+        "flipped_max": 0.020142877153662978,
+        "mask_dice_min": 0.8856346201779847,
+        "mask_dice_mean": 0.9941609391559625
+      },
+      "metrics": {
+        "mean_per_image": {
+          "dice": 0.904250109421606,
+          "iou": 0.8443152501092471,
+          "precision": 0.9361237446907977,
+          "recall": 0.9028623697928615,
+          "accuracy": 0.9688976987258977
+        },
+        "dataset_level": {
+          "dice": 0.9028751787790559,
+          "iou": 0.8229466340705738,
+          "precision": 0.9132324007573694,
+          "recall": 0.8927502505477928,
+          "accuracy": 0.9696650417723612
+        },
+        "num_images": 100,
+        "below_0.5_dice": 4
+      }
+    },
+    "coreml_fp16": {
+      "file": "polyp_unet_fp16.mlpackage",
+      "size_mb": 48.935492,
+      "parity": {
+        "max_prob_diff": 0.03130069375038147,
+        "flipped_mean": 6.004664078714788e-05,
+        "flipped_max": 0.0011984249272384865,
+        "mask_dice_min": 0.9936102236157186,
+        "mask_dice_mean": 0.9997326412887152
+      },
+      "metrics": {
+        "mean_per_image": {
+          "dice": 0.903670125632415,
+          "iou": 0.8436714702449616,
+          "precision": 0.9371578410425809,
+          "recall": 0.9012023171420646,
+          "accuracy": 0.968940244816162
+        },
+        "dataset_level": {
+          "dice": 0.9034598661006795,
+          "iou": 0.8239186493684977,
+          "precision": 0.9158218280902399,
+          "recall": 0.8914271882590599,
+          "accuracy": 0.9699118275413079
+        },
+        "num_images": 100,
+        "below_0.5_dice": 4
+      }
+    },
+    "coreml_fp32": {
+      "file": "polyp_unet_fp32.mlpackage",
+      "size_mb": 97.783048,
+      "parity": {
+        "max_prob_diff": 8.52346420288086e-06,
+        "flipped_mean": 3.1127920188012634e-08,
+        "flipped_max": 3.1127920188012637e-06,
+        "mask_dice_min": 0.9999936509945716,
+        "mask_dice_mean": 0.9999999365078145
+      },
+      "metrics": {
+        "mean_per_image": {
+          "dice": 0.903605731289576,
+          "iou": 0.8436028200701524,
+          "precision": 0.9372208916638454,
+          "recall": 0.9010860919427204,
+          "accuracy": 0.9689245909119087
+        },
+        "dataset_level": {
+          "dice": 0.9034024809394497,
+          "iou": 0.823823203351208,
+          "precision": 0.9158430357882628,
+          "recall": 0.8912953746326564,
+          "accuracy": 0.9698964822364011
+        },
+        "num_images": 100,
+        "below_0.5_dice": 4
+      }
+    }
+  }
+}

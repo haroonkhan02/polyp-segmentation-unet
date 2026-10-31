@@ -32,6 +32,8 @@ polyp-train = "polypseg.train:main"
 polyp-evaluate = "polypseg.evaluate:main"
 polyp-predict = "polypseg.predict:main"
 polyp-demo = "polypseg.demo:main"
+polyp-export = "polypseg.export_models:main"
+polyp-benchmark = "polypseg.benchmark:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
