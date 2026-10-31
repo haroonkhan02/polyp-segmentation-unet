@@ -101,7 +101,7 @@ class PolypSegmenter:
         self.model.eval()
         x = preprocess(rgb, self.size)
         start = time.perf_counter()
-        probs = self._forward(x)[0]
+        probs = self._forward(x)[0].float().cpu()  # the copy waits for the GPU to finish
         self.last_inference_ms = (time.perf_counter() - start) * 1000
         return self._to_image(probs, rgb.shape[:2])
 
