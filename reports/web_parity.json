@@ -1,0 +1,46 @@
+{
+  "model": "polyp_unet_int8.onnx",
+  "images": 100,
+  "onnxruntime_web": "1.30.0",
+  "js_ms_per_frame_node_wasm": 184.80440832000005,
+  "max_prob_diff": 0.06606170535087585,
+  "flipped_pixels_mean": 7.522157519845468e-05,
+  "flipped_pixels_max": 0.0009135853773569348,
+  "mask_dice_min": 0.9979103013835782,
+  "python": {
+    "mean_per_image": {
+      "dice": 0.904250109421606,
+      "iou": 0.8443152501092471,
+      "precision": 0.9361237446907977,
+      "recall": 0.9028623697928615,
+      "accuracy": 0.9688976987258977
+    },
+    "dataset_level": {
+      "dice": 0.9028751787790559,
+      "iou": 0.8229466340705738,
+      "precision": 0.9132324007573694,
+      "recall": 0.8927502505477928,
+      "accuracy": 0.9696650417723612
+    },
+    "num_images": 100,
+    "below_0.5_dice": 4
+  },
+  "javascript": {
+    "mean_per_image": {
+      "dice": 0.904277595413554,
+      "iou": 0.8443623242864383,
+      "precision": 0.9361496917500957,
+      "recall": 0.9028822761242449,
+      "accuracy": 0.9689094496976186
+    },
+    "dataset_level": {
+      "dice": 0.9029296715452502,
+      "iou": 0.8230371819617514,
+      "precision": 0.913315285530098,
+      "recall": 0.8927775984780131,
+      "accuracy": 0.9696829625130566
+    },
+    "num_images": 100,
+    "below_0.5_dice": 4
+  }
+}

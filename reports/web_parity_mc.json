@@ -1,0 +1,51 @@
+{
+  "model": "polyp_unet_mc8_int8.onnx",
+  "images": 100,
+  "onnxruntime_web": "1.30.0",
+  "js_ms_per_frame_node_wasm": 668.43027455,
+  "errors_of": "polyp_unet_int8.onnx",
+  "python": {
+    "mean_prediction": {
+      "mean_per_image": {
+        "dice": 0.904361218802782,
+        "iou": 0.8444563718764545,
+        "precision": 0.9363693544113736,
+        "recall": 0.902753063252447,
+        "accuracy": 0.9687914750684855
+      },
+      "dataset_level": {
+        "dice": 0.9023451921265192,
+        "iou": 0.822066450813129,
+        "precision": 0.9120683058283815,
+        "recall": 0.892827198450835,
+        "accuracy": 0.9694789665366385
+      },
+      "num_images": 100
+    },
+    "pixel_error_auroc": 0.9281577448383521,
+    "mean_std_on_error_pixels": 0.0651794970035553,
+    "mean_std_on_correct_pixels": 0.008391138166189194
+  },
+  "javascript": {
+    "mean_prediction": {
+      "mean_per_image": {
+        "dice": 0.9040540726198993,
+        "iou": 0.8438767955535486,
+        "precision": 0.9342477889789558,
+        "recall": 0.9041967388700808,
+        "accuracy": 0.9688046367090997
+      },
+      "dataset_level": {
+        "dice": 0.9023742855185048,
+        "iou": 0.8221147460496363,
+        "precision": 0.911241612510937,
+        "recall": 0.8936778719573153,
+        "accuracy": 0.9694599726976979
+      },
+      "num_images": 100
+    },
+    "pixel_error_auroc": 0.9167270444902962,
+    "mean_std_on_error_pixels": 0.06527560949325562,
+    "mean_std_on_correct_pixels": 0.008569572120904922
+  }
+}

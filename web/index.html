@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Polyp Segmentation in the Browser</title>
+  <style>
+    :root {
+      --bg: #f6f6f4; --fg: #1d1d1b; --muted: #66665f; --card: #ffffff; --line: #deded8;
+      --accent: #2f6fdb; --warn: #8a4b00;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg: #161615; --fg: #ececea; --muted: #a2a29b; --card: #20201f; --line: #353533;
+              --accent: #7aa7f2; --warn: #f0b060; }
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--fg);
+           font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+    main { max-width: 900px; margin: 0 auto; padding: 24px 16px 48px; }
+    h1 { font-size: 1.5rem; margin: 0 0 4px; }
+    p { margin: 0 0 12px; }
+    a { color: var(--accent); }
+    .muted { color: var(--muted); }
+    .warn { color: var(--warn); font-weight: 600; }
+    .examples { display: flex; gap: 8px; flex-wrap: wrap; margin: 16px 0 8px; }
+    .examples button { padding: 0; border: 2px solid transparent; border-radius: 6px;
+                       background: none; cursor: pointer; }
+    .examples button[aria-pressed="true"] { border-color: var(--accent); }
+    .examples img { display: block; width: 96px; height: 80px; object-fit: cover;
+                    border-radius: 4px; }
+    .controls { display: flex; gap: 16px; flex-wrap: wrap; align-items: center;
+                margin: 4px 0 12px; }
+    .upload { display: inline-block; padding: 6px 12px; cursor: pointer;
+              border: 1px solid var(--line); border-radius: 6px; background: var(--card); }
+    .upload input { display: none; }
+    .views { display: inline-flex; border: 1px solid var(--line); border-radius: 6px;
+             overflow: hidden; }
+    .views button { border: 0; padding: 6px 12px; background: var(--card); color: var(--fg);
+                    cursor: pointer; font: inherit; }
+    .views button + button { border-left: 1px solid var(--line); }
+    .views button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+    canvas { max-width: 100%; height: auto; display: block; border-radius: 8px;
+             background: var(--card); border: 1px solid var(--line); }
+    #status { margin: 10px 0 0; font-variant-numeric: tabular-nums; }
+    .legend span { display: inline-block; width: 12px; height: 12px; border-radius: 2px;
+                   vertical-align: -1px; margin: 0 4px 0 12px; }
+    .ramp { display: inline-block; width: 120px; height: 10px; border-radius: 2px;
+            vertical-align: 0; margin: 0 6px;
+            background: linear-gradient(90deg, #440154, #3b528b, #21918c, #5ec962, #fde725); }
+    footer { margin-top: 24px; font-size: 13px; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Polyp segmentation in your browser</h1>
+  <p class="muted">A U-Net (ResNet-34 encoder) trained on Kvasir-SEG colonoscopy frames,
+    quantised to INT8 and run with onnxruntime-web. The model downloads once (25 MB) and every
+    image is processed on your device; nothing is uploaded.</p>
+  <p class="warn">Research demo. Not a medical device and not for clinical use.</p>
+
+  <div class="examples" id="examples"></div>
+  <div class="controls">
+    <label class="upload">Upload an endoscopy image<input type="file" id="file"
+      accept="image/*"></label>
+    <div class="views" role="group" aria-label="View">
+      <button type="button" data-view="mask" aria-pressed="true">Mask</button>
+      <button type="button" data-view="probability" aria-pressed="false">Probability</button>
+      <button type="button" data-view="uncertainty" aria-pressed="false">Uncertainty</button>
+    </div>
+    <label><input type="checkbox" id="truth" checked> expert mask (examples)</label>
+  </div>
+
+  <canvas id="view" width="622" height="528"></canvas>
+  <p id="status" class="muted">Loading the runtime…</p>
+  <p class="muted legend" id="legend"></p>
+
+  <footer class="muted">
+    <p>Uncertainty is Monte-Carlo dropout: a second model file (25 MB, loaded when you open that
+      view) runs the decoder 8 times with dropout on and shows the per-pixel standard
+      deviation. It flags uncertain boundaries well but can miss whole regions the model is
+      confidently wrong about; examples 4 and 5 are two of the worst test cases.</p>
+    <p>Trained on 800 frames from one hospital (Kvasir-SEG, Jha et al. 2020, CC BY 4.0); the
+      example frames come from its held-out test split. Numbers, training code and the
+      error analysis: <a href="https://github.com/haroonkhan02/polyp-segmentation-unet">GitHub
+      repo</a>.</p>
+  </footer>
+</main>
+<script type="module" src="app.js"></script>
+</body>
+</html>
